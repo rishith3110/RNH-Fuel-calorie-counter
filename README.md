@@ -1,6 +1,6 @@
 # 🔥 RNH Fuel – Calorie Counter Web App
 
-[🔗 Live Demo](https://rishith3110.github.io/RNH-Fuel-calorie-counter/)
+[🔗 Live Demo] (https://rishith3110.github.io/RNH-Fuel-calorie-counter/)
 
 **RNH Fuel** is a fully responsive and browser-based calorie counter app designed to help users track calories, protein, and fat for every meal. Whether your goal is weight gain or weight loss, this app gives real-time nutritional feedback tailored to Indian food inputs.
 
