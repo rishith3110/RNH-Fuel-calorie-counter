@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RNH Fuel - Calorie Counter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
+            margin: 0;
+            padding: 20px;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 30px 35px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+            color: #eee;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 25px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: 600;
+            color: #ffeb3b;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1.8px solid #555;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+            margin-bottom: 12px;
+            background: #2c2c2c;
+            color: #eee;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            border-color: #ffd700;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+            background: #3a3a3a;
+        }
+
+        button {
+            background: #ffd700;
+            border: none;
+            color: #121212;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 12px 0;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.6);
+            margin-top: 10px;
+        }
+
+        button:hover:not(:disabled) {
+            background: #e6c200;
+            box-shadow: 0 6px 12px rgba(230, 194, 0, 0.8);
+        }
+
+        button:disabled {
+            background: #aaa31b;
+            cursor: not-allowed;
+            box-shadow: none;
+            color: #444;
+        }
+
+        #loginMessage {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #ff6f61;
+            min-height: 24px;
+        }
+
+        #bmiResult {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #ffd700;
+            min-height: 24px;
+        }
+
+        #foodResult {
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            min-height: 48px;
+            white-space: pre-line;
+            border-radius: 8px;
+            padding: 10px;
+            color: #eee;
+            background: #2c2c2c;
+        }
+
+        #foodResult.green {
+            background-color: #144d14;
+            border-left: 6px solid #4caf50;
+            color: #b9f6ca;
+        }
+
+        #foodResult.orange {
+            background-color: #4a3d00;
+            border-left: 6px solid #ff9800;
+            color: #ffecb3;
+        }
+
+        #foodResult.red {
+            background-color: #5a1a1a;
+            border-left: 6px solid #f44336;
+            color: #ff8a80;
+        }
+
+        .slide {
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            gap: 15px;
+        }
+
+        .navigation-buttons button {
+            width: 100%;
+            max-width: 140px;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        p {
+            color: #ccc;
+        }
+
+        @media (max-width: 520px) {
+            .container {
+                padding: 20px 25px;
+            }
+
+            h1,
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            .navigation-buttons {
+                flex-direction: column;
+            }
+
+            .navigation-buttons button {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Slide 1: Login -->
+        <div id="slide1" class="slide active">
+            <h1>Login</h1>
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="eg. nikhil12@gmail.com" />
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="eg. nikhil12#" />
+
+            <button onclick="handleLogin()">Login</button>
+            <div id="loginMessage"></div>
+        </div>
+
+        <!-- Slide 2: Personal Details -->
+        <div id="slide2" class="slide">
+            <h2>Enter your gender</h2>
+            <select id="gender">
+                <option value="">-- Select Gender --</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+
+            <h2>Enter the details</h2>
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" />
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" placeholder="Enter age" />
+
+            <label for="weight">Weight (kg):</label>
+            <input type="number" id="weight" />
+
+            <label for="height">Height (cm):</label>
+            <input type="number" id="height" />
+
+            <h2>BMI Calculator</h2>
+            <label for="bmiWeight">Weight (kg):</label>
+            <input type="number" id="bmiWeight" />
+
+            <label for="bmiHeight">Height (cm):</label>
+            <input type="number" id="bmiHeight" />
+
+            <button onclick="calculateBMI()">Calculate BMI</button>
+            <div id="bmiResult"></div>
+
+            <div class="navigation-buttons">
+                <button onclick="nextSlide(1)">Previous</button>
+                <button onclick="nextSlide(3)">Next</button>
+            </div>
+        </div>
+
+        <!-- Slide 3: Food Intake -->
+        <div id="slide3" class="slide">
+            <h1>RNH Fuel - Calorie Counter</h1>
+
+            <label for="goal">Select Your Goal:</label>
+            <select id="goal">
+                <option value="">-- Select --</option>
+                <option value="gain">Gain Weight</option>
+                <option value="lose">Lose Weight</option>
+            </select>
+
+            <label for="breakfast">Breakfast (comma separated):</label>
+            <input type="text" id="breakfast" placeholder="e.g. idli, sambar" />
+
+            <label for="lunch">Lunch (comma separated):</label>
+            <input type="text" id="lunch" placeholder="e.g. rice, dal, chicken" />
+
+            <label for="snacks">Snacks (comma separated):</label>
+            <input type="text" id="snacks" placeholder="e.g. banana, milk" />
+
+            <label for="dinner">Dinner (comma separated):</label>
+            <input type="text" id="dinner" placeholder="e.g. roti, paneer" />
+
+            <button id="submitFoodBtn">Calculate</button>
+
+            <div id="foodResult"></div>
+
+            <div class="navigation-buttons">
+                <button onclick="nextSlide(2)">Previous</button>
+                <button onclick="nextSlide(4)">Next</button>
+            </div>
+        </div>
+
+        <div id="slide4" class="slide">
+            <h2>Food Feedback</h2>
+            <ul id="feedbackList" style="margin-left: 20px;"></ul>
+
+            <div id="logoContainer" style="text-align:center; margin: 25px 0;">
+            </div>
+
+            <ul id="thankYouList" style="margin-left: 20px;"></ul>
+
+            <p style="text-align:center; font-size: 0.9rem; color: #ccc; margin-top: 30px;">
+                &copy; RNH FUEL. All rights reserved.
+            </p>
+
+            <div class="navigation-buttons">
+                <button onclick="nextSlide(3)">Previous</button>
+                <button onclick="nextSlide(1)">Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loginAttempts = 0;
+        let passAttempts = 0;
+        let timeoutActive = false;
+
+        function handleLogin() {
+            if (timeoutActive) return;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('loginMessage');
+            const specialCharRegex = /[^A-Za-z0-9]/;
+
+            if (!username.includes('@') || !username.includes('.com')) {
+                loginAttempts++;
+                if (loginAttempts >= 3) return startTimeout('Username');
+                msg.textContent = `Invalid email. Attempts left: ${3 - loginAttempts}`;
+                return;
+            }
+
+            if (!specialCharRegex.test(password)) {
+                passAttempts++;
+                if (passAttempts >= 3) return startTimeout('Password');
+                msg.textContent = `Password needs special character. Attempts left: ${3 - passAttempts}`;
+                return;
+            }
+
+            msg.textContent = '';
+            nextSlide(2);
+        }
+
+        function startTimeout(type) {
+            timeoutActive = true;
+            const msg = document.getElementById('loginMessage');
+            let seconds = 30;
+            msg.textContent = `${type} attempts exceeded. Try again in ${seconds}s`;
+            const interval = setInterval(() => {
+                seconds--;
+                msg.textContent = `${type} attempts exceeded. Try again in ${seconds}s`;
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    timeoutActive = false;
+                    loginAttempts = 0;
+                    passAttempts = 0;
+                    msg.textContent = '';
+                }
+            }, 1000);
+        }
+
+        function nextSlide(n) {
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide${n}`).classList.add('active');
+        }
+
+        // DOB to Age
+        document.getElementById("dob").addEventListener("change", () => {
+            const dob = new Date(document.getElementById("dob").value);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            if (
+                today.getMonth() < dob.getMonth() ||
+                (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
+            ) {
+                age--;
+            }
+            if (age >= 0) {
+                document.getElementById("age").value = age;
+            }
+        });
+
+        function calculateBMI() {
+            const w = parseFloat(document.getElementById("bmiWeight").value);
+            const h = parseFloat(document.getElementById("bmiHeight").value) / 100;
+            const result = document.getElementById("bmiResult");
+            if (w && h) {
+                const bmi = (w / (h * h)).toFixed(2);
+                result.textContent = `Your BMI is ${bmi}`;
+            } else {
+                result.textContent = "Please enter valid height and weight.";
+            }
+        }
+
+        const foodData = {
+            "chapati": { "calories": 104, "protein": 2.6, "fat": 3, "serving": 1 },
+            "roti": { "calories": 106, "protein": 3, "fat": 2.5, "serving": 1 },
+            "dal": { "calories": 116, "protein": 9, "fat": 3.3, "serving": 1 },
+            "rajma": { "calories": 140, "protein": 8.7, "fat": 5, "serving": 100 },
+            "chole": { "calories": 150, "protein": 7, "fat": 6, "serving": 100 },
+            "aloo paratha": { "calories": 210, "protein": 4, "fat": 10, "serving": 1 },
+            "butter naan": { "calories": 262, "protein": 6, "fat": 8, "serving": 1 },
+            "paneer butter masala": { "calories": 298, "protein": 9, "fat": 22, "serving": 100 },
+            "matar paneer": { "calories": 260, "protein": 11, "fat": 17, "serving": 100 },
+            "palak paneer": { "calories": 250, "protein": 10, "fat": 16, "serving": 100 },
+            "mixed veg curry": { "calories": 95, "protein": 2, "fat": 6, "serving": 100 },
+
+            "cooked rice": { "calories": 130, "protein": 2.7, "fat": 0.3, "serving": 100 },
+            "idli": { "calories": 58, "protein": 1.6, "fat": 0.4, "serving": 1 },
+            "dosa": { "calories": 133, "protein": 2.7, "fat": 4, "serving": 1 },
+            "upma": { "calories": 220, "protein": 5, "fat": 7, "serving": 100 },
+            "sambar": { "calories": 130, "protein": 5, "fat": 4, "serving": 100 },
+            "rasam": { "calories": 40, "protein": 1.5, "fat": 1.5, "serving": 100 },
+            "curd rice": { "calories": 140, "protein": 3.5, "fat": 3.5, "serving": 100 },
+            "lemon rice": { "calories": 180, "protein": 3, "fat": 6, "serving": 100 },
+            "vada": { "calories": 97, "protein": 1.9, "fat": 5.5, "serving": 1 },
+            "appam": { "calories": 120, "protein": 2.5, "fat": 2, "serving": 1 },
+
+            "aloo curry": { "calories": 120, "protein": 2.5, "fat": 7, "serving": 100 },
+            "baingan bharta": { "calories": 110, "protein": 2, "fat": 8, "serving": 100 },
+            "bhindi masala": { "calories": 130, "protein": 2.8, "fat": 9, "serving": 100 },
+            "aloo matar": { "calories": 140, "protein": 3, "fat": 8, "serving": 100 },
+            "kadhi pakora": { "calories": 160, "protein": 4, "fat": 10, "serving": 100 },
+            "mix veg curry": { "calories": 95, "protein": 2, "fat": 6, "serving": 100 },
+            "lauki curry": { "calories": 80, "protein": 2, "fat": 4, "serving": 100 },
+            "matar mushroom": { "calories": 160, "protein": 5, "fat": 12, "serving": 100 },
+            "soya chunk curry": { "calories": 170, "protein": 12, "fat": 8, "serving": 100 },
+            "aloo gobi": { "calories": 120, "protein": 2.7, "fat": 7, "serving": 100 },
+
+            "butter chicken": { "calories": 300, "protein": 24, "fat": 20, "serving": 100 },
+            "chicken tikka masala": { "calories": 280, "protein": 26, "fat": 18, "serving": 100 },
+            "chicken kheema": { "calories": 250, "protein": 23, "fat": 16, "serving": 100 },
+            "egg masala": { "calories": 180, "protein": 13, "fat": 13, "serving": 100 },
+            "chicken do pyaza": { "calories": 260, "protein": 25, "fat": 15, "serving": 100 },
+            "mutton rogan josh": { "calories": 320, "protein": 24, "fat": 22, "serving": 100 },
+            "fish masala": { "calories": 210, "protein": 22, "fat": 12, "serving": 100 },
+            "prawn curry": { "calories": 190, "protein": 21, "fat": 10, "serving": 100 },
+            "mutton kheema": { "calories": 330, "protein": 27, "fat": 24, "serving": 100 },
+            "chicken stew": { "calories": 200, "protein": 20, "fat": 10, "serving": 100 },
+
+
+            "chicken curry": { "calories": 240, "protein": 26, "fat": 14, "serving": 100 },
+            "mutton curry": { "calories": 280, "protein": 25, "fat": 20, "serving": 100 },
+            "fish curry": { "calories": 190, "protein": 20, "fat": 10, "serving": 100 },
+            "egg curry": { "calories": 190, "protein": 13, "fat": 13, "serving": 100 },
+            "chicken rice": { "calories": 290, "protein": 18, "fat": 9, "serving": 200 },
+            "mutton rice": { "calories": 320, "protein": 19, "fat": 12, "serving": 200 },
+            "egg rice": { "calories": 250, "protein": 12, "fat": 8, "serving": 200 },
+            "veg biryani": { "calories": 220, "protein": 5, "fat": 7, "serving": 200 },
+            "chicken biryani": { "calories": 290, "protein": 15, "fat": 10, "serving": 200 },
+            "mutton biryani": { "calories": 320, "protein": 18, "fat": 12, "serving": 200 },
+
+            "fish fry": { "calories": 220, "protein": 21, "fat": 12, "serving": 100 },
+            "prawns": { "calories": 99, "protein": 24, "fat": 0.3, "serving": 100 },
+            "crab": { "calories": 87, "protein": 18, "fat": 1.1, "serving": 100 },
+            "dry fish": { "calories": 293, "protein": 63, "fat": 1, "serving": 100 },
+            "surmai fry": { "calories": 280, "protein": 24, "fat": 20, "serving": 100 },
+            "pomfret curry": { "calories": 190, "protein": 18, "fat": 12, "serving": 100 },
+
+            "gulab jamun": { "calories": 175, "protein": 2, "fat": 9, "serving": 1 },
+            "laddu": { "calories": 160, "protein": 3, "fat": 6, "serving": 1 },
+            "kheer": { "calories": 140, "protein": 3.1, "fat": 4.3, "serving": 100 },
+            "halwa": { "calories": 210, "protein": 2.2, "fat": 9, "serving": 100 },
+            "rasgulla": { "calories": 125, "protein": 2.4, "fat": 5, "serving": 1 },
+            "jalebi": { "calories": 150, "protein": 1, "fat": 8, "serving": 1 },
+            "peda": { "calories": 140, "protein": 3.5, "fat": 6, "serving": 1 },
+            "kaju katli": { "calories": 120, "protein": 3.8, "fat": 5, "serving": 1 },
+
+            "samosa": { "calories": 130, "protein": 2, "fat": 6, "serving": 1 },
+            "kachori": { "calories": 200, "protein": 4, "fat": 11, "serving": 1 },
+            "mixture": { "calories": 500, "protein": 12, "fat": 30, "serving": 100 },
+            "murukku": { "calories": 460, "protein": 7, "fat": 20, "serving": 100 },
+            "pani puri": { "calories": 150, "protein": 2, "fat": 7, "serving": 6 },
+            "bhel puri": { "calories": 170, "protein": 4, "fat": 6, "serving": 1 },
+            "pav bhaji": { "calories": 400, "protein": 8, "fat": 22, "serving": 1 },
+            "chowmein": { "calories": 330, "protein": 7, "fat": 15, "serving": 1 },
+
+            "tea": { "calories": 30, "protein": 0.5, "fat": 1, "serving": 1 },
+            "coffee": { "calories": 35, "protein": 0.3, "fat": 0.9, "serving": 1 },
+            "lassi": { "calories": 150, "protein": 5, "fat": 4, "serving": 1 },
+            "horlicks": { "calories": 76, "protein": 1.5, "fat": 1, "serving": 20 },
+            "boost": { "calories": 80, "protein": 2, "fat": 1, "serving": 20 },
+            "frooti": { "calories": 135, "protein": 0.2, "fat": 0.3, "serving": 250 },
+            "thums up": { "calories": 150, "protein": 0, "fat": 0, "serving": 300 },
+            "vanilla ice cream": { "calories": 207, "protein": 3.5, "fat": 11, "serving": 100 },
+            "chocolate ice cream": { "calories": 216, "protein": 4.2, "fat": 13, "serving": 100 },
+
+            "banana": { "calories": 89, "protein": 1.1, "fat": 0.3, "serving": 1 },
+            "apple": { "calories": 95, "protein": 0.5, "fat": 0.3, "serving": 1 },
+            "mango": { "calories": 135, "protein": 1, "fat": 0.6, "serving": 1 },
+            "watermelon": { "calories": 30, "protein": 0.6, "fat": 0.2, "serving": 100 },
+
+            "raw dal": { "calories": 350, "protein": 24, "fat": 2, "serving": 100 },
+            "raw wheat flour": { "calories": 340, "protein": 12, "fat": 2.5, "serving": 100 },
+            "raw oats": { "calories": 389, "protein": 17, "fat": 7, "serving": 100 },
+            "raw paneer": { "calories": 300, "protein": 20, "fat": 25, "serving": 100 },
+
+            "protein powder": { "calories": 120, "protein": 25, "fat": 1, "serving": 1 },
+            "peanut butter": { "calories": 220, "protein": 6.82, "fat": 2.4, "serving": 1 },
+            "brown bread": { "calories": 70, "protein": 2.5, "fat": 1.2, "serving": 1 },
+            "curd": { "calories": 61, "protein": 3.5, "fat": 3.3, "serving": 100 },
+            "boiled egg": { "calories": 78, "protein": 6, "fat": 5, "serving": 1 },
+            "omelette": { "calories": 94, "protein": 6.7, "fat": 7, "serving": 1 },
+            "maggie": { "calories": 345, "protein": 7.1, "fat": 13, "serving": 100 },
+            "parle biscuit": { "calories": 80, "protein": 1.2, "fat": 2.5, "serving": 1 },
+            "oreo": { "calories": 53, "protein": 0.7, "fat": 2.3, "serving": 1 },
+            "bourbon": { "calories": 70, "protein": 0.8, "fat": 3.5, "serving": 1 },
+            "lays chips": { "calories": 160, "protein": 2, "fat": 10, "serving": 30 }
+        };
+
+        document.getElementById("submitFoodBtn").onclick = () => {
+            const allFoods = [
+                ...document.getElementById("breakfast").value.split(","),
+                ...document.getElementById("lunch").value.split(","),
+                ...document.getElementById("snacks").value.split(","),
+                ...document.getElementById("dinner").value.split(",")
+            ].map(f => f.trim().toLowerCase()).filter(f => f.length > 0);
+
+            let total = { calories: 0, protein: 0, fat: 0 };
+
+            allFoods.forEach(item => {
+                if (foodData[item]) {
+                    total.calories += foodData[item].calories;
+                    total.protein += foodData[item].protein;
+                    total.fat += foodData[item].fat;
+                }
+            });
+
+            const resultBox = document.getElementById("foodResult");
+            resultBox.innerText = `Total Calories: ${total.calories} kcal\nProtein: ${total.protein}g\nFat: ${total.fat}g`;
+
+            const goal = document.getElementById("goal").value;
+            let feedback = "";
+            let colorClass = "";
+            let suggestion = "";
+
+            if (goal === "gain") {
+                const calorieGap = 3000 - total.calories;
+                const proteinGap = 170 - total.protein;
+
+                if (calorieGap > 0 || proteinGap > 0) {
+                    colorClass = "orange";
+                    feedback += `\n\n⚠ Classic bulk goal:\n`;
+                    if (calorieGap > 0) feedback += `➡ You need ${calorieGap} more kcal.\n`;
+                    if (proteinGap > 0) feedback += `➡ You need ${proteinGap}g more protein.\n`;
+                } else {
+                    feedback = `\n\n✅ Great! You've met your bulk goal. 💪`;
+                    colorClass = "green";
+                }
+
+            } else if (goal === "lose") {
+                const calorieExcess = total.calories - 2200;
+                const proteinExcess = total.protein - 150;
+
+                if (calorieExcess > 0 || proteinExcess > 0) {
+                    colorClass = "red";
+                    feedback = `\n\n⚠ Cut goal exceeded:\n`;
+                    if (calorieExcess > 0) feedback += `➡ Reduce ${calorieExcess} kcal.\n`;
+                    if (proteinExcess > 0) feedback += `➡ Reduce ${proteinExcess}g protein.\n`;
+                    suggestion += `🥗 Try avoiding high-calorie snacks or fried foods.\n`;
+                } else {
+                    feedback = `\n\n✅ Awesome! You are within your cut goal. 🏋‍♂`;
+                    colorClass = "green";
+                }
+
+            } else {
+                feedback = `\n\n❗ Please select a goal.`;
+                colorClass = "red";
+            }
+
+            resultBox.innerText += `\n${feedback}${suggestion}`;
+            resultBox.className = colorClass;
+        };
+
+        function showSlide4Feedback() {
+            const feedbackPoints = [
+                "Great choice! Rich in protein—helps with strength and recovery.",
+                "Carb-rich foods provide lasting energy—just keep portions in balance.",
+                "Tasty indulgence spotted—nothing wrong with treats in moderation!",
+                "Fruits add fiber and natural sweetness—a win for digestion and immunity."
+            ];
+
+            const thankYouPoints = [
+                "Thank you for choosing RNH Fuel for tracking your daily nutrition!",
+                "Stay consistent, stay confident, and never forget—you're your own best investment.",
+                "Until next time, stay fueled, stay fabulous!"
+            ];
+
+            const feedbackList = document.getElementById("feedbackList");
+            const thankYouList = document.getElementById("thankYouList");
+
+            feedbackList.innerHTML = "";
+            thankYouList.innerHTML = "";
+
+            feedbackPoints.forEach(point => {
+                const li = document.createElement("li");
+                li.textContent = point;
+                feedbackList.appendChild(li);
+            });
+
+            thankYouPoints.forEach(point => {
+                const li = document.createElement("li");
+                li.textContent = point;
+                thankYouList.appendChild(li);
+            });
+        }
+
+        const originalNextSlide = nextSlide;
+        nextSlide = function (n) {
+            originalNextSlide(n);
+            if (n === 4) {
+                showSlide4Feedback();
+            }
+        };
+    </script>
+
+</body>
+
+</html>
